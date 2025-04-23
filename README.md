@@ -10,6 +10,33 @@ This project implements various machine learning models to detect Parkinson's Di
 - Model persistence using joblib
 - Visualization of results including confusion matrices and accuracy comparisons
 
+## Visualizations
+
+### Model Accuracy Comparison
+![Model Accuracy Comparison](model_accuracy_comparison.png)
+*Comparison of accuracy scores across different models*
+
+### Confusion Matrices
+#### Support Vector Machine (SVM)
+![SVM Confusion Matrix](confusion_matrix_svm.png)
+*Confusion matrix showing the performance of the SVM model*
+
+#### Random Forest
+![Random Forest Confusion Matrix](confusion_matrix_random_forest.png)
+*Confusion matrix showing the performance of the Random Forest model*
+
+#### Gradient Boosting
+![Gradient Boosting Confusion Matrix](confusion_matrix_gradient_boosting.png)
+*Confusion matrix showing the performance of the Gradient Boosting model*
+
+## Model Performance
+
+Based on our experiments, the Random Forest classifier achieved the best performance with:
+- Accuracy: 98.74%
+- Precision: 98.87%
+- Recall: 98.74%
+- F1-score: 98.77%
+
 ## Dataset
 
 The project uses the Parkinson's Disease dataset which contains various voice measurements. The dataset includes features like:

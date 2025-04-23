@@ -8,13 +8,15 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
-# Load the dataset
-url_string = 'https://raw.githubusercontent.com/Bishwaprotapi/Parkinson-s-DiseaseML/main/PDdataset.csv'
-df = pd.read_csv(url_string)
+# Load the dataset from local file
+df = pd.read_csv('PDdatasetN.csv')
 
 # Drop the 'name' column as it's not needed for the model
 if 'name' in df.columns:
-    df.drop(['name'], axis=1, inplace=True)
+    df = df.drop(['name'], axis=1)
+
+# Ensure status is integer type for classification
+df['status'] = df['status'].astype(int)
 
 # Split the data into features and target
 X = df.drop('status', axis=1)
