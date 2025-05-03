@@ -75,6 +75,76 @@ body {
     color: #2c3e50;
 }
 
+/* New styles for sample data toggle */
+.sample-data-toggle {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.form-check-input:checked {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+/* Styles for result display */
+.result-content {
+    padding: 1rem;
+}
+
+.prediction-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.prediction-status i {
+    font-size: 2rem;
+}
+
+.prediction-status i.fa-check-circle {
+    color: #28a745;
+}
+
+.prediction-status i.fa-times-circle {
+    color: #dc3545;
+}
+
+.confidence-meter {
+    margin: 1.5rem 0;
+}
+
+.progress {
+    height: 1.5rem;
+    border-radius: 0.75rem;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    background-color: #3498db;
+    transition: width 0.6s ease;
+}
+
+.recommendation {
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.recommendation h5 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+/* Help text styles */
+.text-muted {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
 @media (max-width: 768px) {
     .card-header h1 {
         font-size: 2rem;
@@ -82,5 +152,10 @@ body {
     
     .container {
         padding: 10px;
+    }
+    
+    .prediction-status {
+        flex-direction: column;
+        text-align: center;
     }
 } 
