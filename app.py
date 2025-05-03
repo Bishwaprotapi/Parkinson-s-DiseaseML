@@ -3,8 +3,8 @@ import pickle
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.model_selection import cross_val_score, train_test_split
 import joblib
 
 app = Flask(__name__)
@@ -27,32 +27,65 @@ data = pd.read_csv('data.csv')
 X = data.drop(['status', 'name'], axis=1)
 y = data['status']
 
+# Split the data for evaluation
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
 # Scale the features
-X_scaled = scaler.transform(X)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
 def calculate_model_metrics():
     metrics = {}
     for model_name, model in models.items():
-        # Calculate cross-validation scores
-        cv_scores = cross_val_score(model, X_scaled, y, cv=5)
+        # Train the model
+        model.fit(X_train_scaled, y_train)
         
         # Make predictions
-        y_pred = model.predict(X_scaled)
+        y_pred = model.predict(X_test_scaled)
         
         # Calculate metrics
+        accuracy = accuracy_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred)
+        recall = recall_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred)
+        
+        # Calculate confusion matrix
+        cm = confusion_matrix(y_test, y_pred)
+        tn, fp, fn, tp = cm.ravel()
+        
+        # Calculate additional metrics
+        specificity = tn / (tn + fp)  # True Negative Rate
+        sensitivity = tp / (tp + fn)  # True Positive Rate
+        
         metrics[model_name] = {
-            'accuracy': float(np.mean(cv_scores)),
-            'precision': float(precision_score(y, y_pred)),
-            'recall': float(recall_score(y, y_pred)),
-            'f1Score': float(f1_score(y, y_pred))
+            'accuracy': float(accuracy),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1Score': float(f1),
+            'specificity': float(specificity),
+            'sensitivity': float(sensitivity),
+            'confusion_matrix': {
+                'true_negative': int(tn),
+                'false_positive': int(fp),
+                'false_negative': int(fn),
+                'true_positive': int(tp)
+            }
         }
     return metrics
+
+def get_accuracy_class(accuracy):
+    if accuracy >= 0.85:
+        return 'accuracy-high'
+    elif accuracy >= 0.75:
+        return 'accuracy-medium'
+    else:
+        return 'accuracy-low'
 
 @app.route('/')
 def home():
     # Calculate model metrics
     model_metrics = calculate_model_metrics()
-    return render_template('index.html', model_metrics=model_metrics)
+    return render_template('index.html', model_metrics=model_metrics, get_accuracy_class=get_accuracy_class)
 
 @app.route('/predict', methods=['POST'])
 def predict():

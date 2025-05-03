@@ -80,13 +80,125 @@ function displayAllPredictions(predictions) {
     resultDiv.appendChild(allPredictionsDiv);
 }
 
-// Handle form submission
+// History functionality
+const HISTORY_KEY = 'parkinsons_prediction_history';
+const MAX_HISTORY_ITEMS = 10;
+
+// Function to get history from localStorage
+function getHistory() {
+    const history = localStorage.getItem(HISTORY_KEY);
+    return history ? JSON.parse(history) : [];
+}
+
+// Function to save history to localStorage
+function saveHistory(history) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+// Function to add new entry to history
+function addToHistory(prediction, values) {
+    const history = getHistory();
+    const newEntry = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        values: values,
+        prediction: prediction
+    };
+    
+    history.unshift(newEntry);
+    if (history.length > MAX_HISTORY_ITEMS) {
+        history.pop();
+    }
+    
+    saveHistory(history);
+    updateHistoryTable();
+}
+
+// Function to format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+
+// Function to update history table
+function updateHistoryTable() {
+    const history = getHistory();
+    const tableBody = document.getElementById('historyTable');
+    tableBody.innerHTML = '';
+    
+    history.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="history-date">${formatDate(entry.date)}</td>
+            <td class="history-value">${entry.values.MDVP_Fo?.toFixed(2) || '-'}</td>
+            <td class="history-value">${entry.values.MDVP_Fhi?.toFixed(2) || '-'}</td>
+            <td class="history-value">${entry.values.MDVP_Flo?.toFixed(2) || '-'}</td>
+            <td class="history-value">${entry.values.MDVP_Jitter?.toFixed(6) || '-'}</td>
+            <td class="history-result ${entry.prediction.includes('Detected') ? 'positive' : 'negative'}">
+                ${entry.prediction}
+            </td>
+            <td class="history-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="loadHistoryEntry(${entry.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteHistoryEntry(${entry.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Function to load history entry into calculator
+function loadHistoryEntry(id) {
+    const history = getHistory();
+    const entry = history.find(item => item.id === id);
+    if (entry) {
+        Object.entries(entry.values).forEach(([key, value]) => {
+            const input = document.getElementById(`calc_${key}`);
+            if (input) {
+                input.value = value;
+            }
+        });
+        updateCalculationResults();
+    }
+}
+
+// Function to delete history entry
+function deleteHistoryEntry(id) {
+    const history = getHistory();
+    const newHistory = history.filter(item => item.id !== id);
+    saveHistory(newHistory);
+    updateHistoryTable();
+}
+
+// Function to clear all history
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all history?')) {
+        saveHistory([]);
+        updateHistoryTable();
+    }
+}
+
+// Add event listener for clear history button
+document.getElementById('clearHistory').addEventListener('click', clearHistory);
+
+// Modify the form submission handler to save to history
 document.getElementById('predictionForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
     const submitButton = this.querySelector('button[type="submit"]');
     const resultDiv = document.getElementById('result');
+    
+    // Get form values for history
+    const values = {};
+    for (const [key, value] of formData.entries()) {
+        if (key !== 'csrf_token') {
+            values[key] = parseFloat(value);
+        }
+    }
     
     // Disable submit button and show loading state
     submitButton.disabled = true;
@@ -101,6 +213,9 @@ document.getElementById('predictionForm').addEventListener('submit', async funct
         const data = await response.json();
         
         if (response.ok) {
+            // Add to history
+            addToHistory(data.prediction, values);
+            
             // Show success result
             resultDiv.style.display = 'block';
             const alertDiv = resultDiv.querySelector('.alert');
@@ -161,6 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 populateModelComparison();
             }
         });
+    updateHistoryTable();
 });
 
 // Sample data for testing
@@ -220,4 +336,134 @@ function getRecommendation(prediction, confidence) {
             return 'Consider regular health monitoring and consult a healthcare provider if symptoms develop.';
         }
     }
-} 
+}
+
+// Calculator functionality
+const calculatorInputs = document.querySelectorAll('.calc-input');
+const calculationResults = document.getElementById('calculationResults');
+
+// Normal ranges for measurements
+const normalRanges = {
+    MDVP_Fo: { min: 100, max: 200 },
+    MDVP_Fhi: { min: 150, max: 250 },
+    MDVP_Flo: { min: 50, max: 150 },
+    MDVP_Jitter: { min: 0, max: 0.02 },
+    MDVP_Jitter_Abs: { min: 0, max: 0.0001 }
+};
+
+// Function to check if value is in normal range
+function checkNormalRange(value, metric) {
+    const range = normalRanges[metric];
+    if (!range) return 'unknown';
+    
+    if (value < range.min) return 'low';
+    if (value > range.max) return 'high';
+    return 'normal';
+}
+
+// Function to get status class
+function getStatusClass(status) {
+    switch (status) {
+        case 'normal': return 'status-normal';
+        case 'low': return 'status-warning';
+        case 'high': return 'status-danger';
+        default: return '';
+    }
+}
+
+// Function to get status text
+function getStatusText(status) {
+    switch (status) {
+        case 'normal': return 'Normal';
+        case 'low': return 'Below Normal';
+        case 'high': return 'Above Normal';
+        default: return 'Unknown';
+    }
+}
+
+// Function to calculate derived metrics
+function calculateDerivedMetrics(values) {
+    const results = {};
+    
+    // Calculate frequency range
+    if (values.MDVP_Fhi && values.MDVP_Flo) {
+        results.frequencyRange = values.MDVP_Fhi - values.MDVP_Flo;
+    }
+    
+    // Calculate jitter ratio
+    if (values.MDVP_Jitter && values.MDVP_Fo) {
+        results.jitterRatio = values.MDVP_Jitter / values.MDVP_Fo;
+    }
+    
+    // Calculate absolute jitter ratio
+    if (values.MDVP_Jitter_Abs && values.MDVP_Fo) {
+        results.absJitterRatio = values.MDVP_Jitter_Abs / values.MDVP_Fo;
+    }
+    
+    return results;
+}
+
+// Function to update calculation results
+function updateCalculationResults() {
+    const values = {};
+    calculatorInputs.forEach(input => {
+        const metric = input.id.replace('calc_', '');
+        values[metric] = parseFloat(input.value) || null;
+    });
+    
+    const derivedMetrics = calculateDerivedMetrics(values);
+    
+    // Clear existing results
+    calculationResults.innerHTML = '';
+    
+    // Add basic measurements
+    Object.entries(values).forEach(([metric, value]) => {
+        if (value !== null) {
+            const status = checkNormalRange(value, metric);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${metric}</td>
+                <td class="calculation-value">${value.toFixed(6)}</td>
+                <td><span class="status-indicator ${getStatusClass(status)}">${getStatusText(status)}</span></td>
+            `;
+            calculationResults.appendChild(row);
+        }
+    });
+    
+    // Add derived metrics
+    Object.entries(derivedMetrics).forEach(([metric, value]) => {
+        if (value !== undefined) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${metric}</td>
+                <td class="calculation-value">${value.toFixed(6)}</td>
+                <td><span class="status-indicator">Calculated</span></td>
+            `;
+            calculationResults.appendChild(row);
+        }
+    });
+}
+
+// Add event listeners to calculator inputs
+calculatorInputs.forEach(input => {
+    input.addEventListener('input', updateCalculationResults);
+});
+
+// Function to copy calculator values to prediction form
+function copyToPredictionForm() {
+    calculatorInputs.forEach(input => {
+        const metric = input.id.replace('calc_', '');
+        const predictionInput = document.getElementById(metric);
+        if (predictionInput) {
+            predictionInput.value = input.value;
+        }
+    });
+}
+
+// Add copy button to calculator section
+const calculatorSection = document.querySelector('.calculator-section');
+const copyButton = document.createElement('button');
+copyButton.className = 'btn btn-primary mt-3';
+copyButton.textContent = 'Copy to Prediction Form';
+copyButton.addEventListener('click', copyToPredictionForm);
+calculatorSection.querySelector('.calculation-results').appendChild(copyButton); 

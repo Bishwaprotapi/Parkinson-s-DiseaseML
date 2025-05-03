@@ -17,8 +17,89 @@
                         <p class="lead">Enter the patient's voice measurements to predict Parkinson's Disease</p>
                     </div>
                     <div class="card-body">
-                        <div class="model-comparison mb-4">
-                            <h3 class="text-center mb-3">Model Performance Comparison</h3>
+                        <!-- Calculator Section -->
+                        <div class="calculator-section mb-4">
+                            <h3 class="text-center mb-3">Voice Measurement Calculator</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="calc_MDVP_Fo" class="form-label">MDVP:Fo (Hz)</label>
+                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Fo" name="calc_MDVP_Fo">
+                                        <small class="text-muted">Average vocal fundamental frequency</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="calc_MDVP_Fhi" class="form-label">MDVP:Fhi (Hz)</label>
+                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Fhi" name="calc_MDVP_Fhi">
+                                        <small class="text-muted">Maximum vocal fundamental frequency</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="calc_MDVP_Flo" class="form-label">MDVP:Flo (Hz)</label>
+                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Flo" name="calc_MDVP_Flo">
+                                        <small class="text-muted">Minimum vocal fundamental frequency</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="calc_MDVP_Jitter" class="form-label">MDVP:Jitter (%)</label>
+                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Jitter" name="calc_MDVP_Jitter">
+                                        <small class="text-muted">Variation in fundamental frequency</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="calc_MDVP_Jitter_Abs" class="form-label">MDVP:Jitter(Abs)</label>
+                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Jitter_Abs" name="calc_MDVP_Jitter_Abs">
+                                        <small class="text-muted">Absolute variation in fundamental frequency</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="calculation-results mt-3">
+                                <h4>Calculated Values:</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Value</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="calculationResults">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History Section -->
+                        <div class="history-section mb-4">
+                            <h3 class="text-center mb-3">Previous Measurements</h3>
+                            <div class="history-controls mb-3">
+                                <button id="clearHistory" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Clear History
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>MDVP:Fo</th>
+                                            <th>MDVP:Fhi</th>
+                                            <th>MDVP:Flo</th>
+                                            <th>MDVP:Jitter</th>
+                                            <th>Result</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historyTable">
+                                        <!-- Will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="model-comparison">
+                            <h3>Model Performance Comparison</h3>
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -28,6 +109,9 @@
                                             <th>Precision</th>
                                             <th>Recall</th>
                                             <th>F1-Score</th>
+                                            <th>Specificity</th>
+                                            <th>Sensitivity</th>
+                                            <th>Confusion Matrix</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modelComparisonTable">
@@ -143,5 +227,70 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+    // Model metrics data
+    const modelMetrics = {
+        {% for model_name, metrics in model_metrics.items() %}
+        "{{ model_name }}": {
+            "accuracy": {{ metrics.accuracy * 100 }},
+            "precision": {{ metrics.precision * 100 }},
+            "recall": {{ metrics.recall * 100 }},
+            "f1Score": {{ metrics.f1Score * 100 }},
+            "specificity": {{ metrics.specificity * 100 }},
+            "sensitivity": {{ metrics.sensitivity * 100 }},
+            "confusion_matrix": {
+                "true_negative": {{ metrics.confusion_matrix.true_negative }},
+                "false_positive": {{ metrics.confusion_matrix.false_positive }},
+                "false_negative": {{ metrics.confusion_matrix.false_negative }},
+                "true_positive": {{ metrics.confusion_matrix.true_positive }}
+            }
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    function populateModelComparison() {
+        const tableBody = document.getElementById('modelComparisonTable');
+        tableBody.innerHTML = '';
+
+        Object.entries(modelMetrics).forEach(([modelName, metrics], index) => {
+            const row = document.createElement('tr');
+            if (index === 0) row.classList.add('best-model');
+
+            row.innerHTML = `
+                <td>${modelName}</td>
+                <td>
+                    <span class="accuracy-badge ${getAccuracyClass(metrics.accuracy)}">
+                        ${metrics.accuracy.toFixed(2)}%
+                    </span>
+                </td>
+                <td>${metrics.precision.toFixed(2)}%</td>
+                <td>${metrics.recall.toFixed(2)}%</td>
+                <td>${metrics.f1Score.toFixed(2)}%</td>
+                <td>${metrics.specificity.toFixed(2)}%</td>
+                <td>${metrics.sensitivity.toFixed(2)}%</td>
+                <td>
+                    <small>
+                        TN: ${metrics.confusion_matrix.true_negative}<br>
+                        FP: ${metrics.confusion_matrix.false_positive}<br>
+                        FN: ${metrics.confusion_matrix.false_negative}<br>
+                        TP: ${metrics.confusion_matrix.true_positive}
+                    </small>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function getAccuracyClass(accuracy) {
+        if (accuracy >= 85) return 'accuracy-high';
+        if (accuracy >= 75) return 'accuracy-medium';
+        return 'accuracy-low';
+    }
+
+    // Initialize the model comparison table when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        populateModelComparison();
+    });
+    </script>
 </body>
 </html> 
