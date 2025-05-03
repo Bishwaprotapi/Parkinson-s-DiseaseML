@@ -279,42 +279,326 @@ document.addEventListener('DOMContentLoaded', function() {
     updateHistoryTable();
 });
 
-// Sample data for testing
+// Sample data values
 const sampleData = {
-    MDVP_Fo: 119.992,
-    MDVP_Fhi: 157.302,
-    MDVP_Flo: 74.997,
-    MDVP_Jitter: 0.00784,
-    MDVP_Jitter_Abs: 0.00007,
-    MDVP_RAP: 0.00370,
-    MDVP_PPQ: 0.00554,
-    Jitter_DDP: 0.01109,
-    MDVP_Shimmer: 0.04374,
-    MDVP_Shimmer_dB: 0.426
+    mdvp_fo: 119.992,
+    mdvp_fhi: 157.302,
+    mdvp_flo: 74.997,
+    mdvp_jitter: 0.00784,
+    mdvp_jitter_abs: 0.00007,
+    mdvp_rap: 0.00370,
+    mdvp_ppq: 0.00554,
+    mdvp_ddp: 0.01109,
+    mdvp_shimmer: 0.04374,
+    mdvp_shimmer_db: 0.426,
+    mdvp_shimmer_apq3: 0.02182,
+    mdvp_shimmer_apq5: 0.03130,
+    mdvp_apq: 0.02971,
+    mdvp_dda: 0.06545,
+    nhr: 0.02211,
+    hnr: 21.033,
+    rpde: 0.414783,
+    dfa: 0.815285,
+    spread1: -4.813031,
+    spread2: 0.266482,
+    d2: 2.301442,
+    ppe: 0.284654
 };
 
-// Function to fill form with sample data
-function fillSampleData() {
-    Object.keys(sampleData).forEach(key => {
+// Normal ranges for voice measurements
+const normalRanges = {
+    mdvp_fo: { min: 100, max: 200 },
+    mdvp_fhi: { min: 150, max: 300 },
+    mdvp_flo: { min: 50, max: 150 },
+    mdvp_jitter: { min: 0, max: 0.02 },
+    mdvp_jitter_abs: { min: 0, max: 0.0001 }
+};
+
+// Function to check if a value is within normal range
+function isInNormalRange(value, metric) {
+    const range = normalRanges[metric];
+    if (!range) return true; // If no range defined, consider it normal
+    return value >= range.min && value <= range.max;
+}
+
+// Function to get status class
+function getStatusClass(value, metric) {
+    if (!normalRanges[metric]) return 'status-normal';
+    const range = normalRanges[metric];
+    if (value < range.min) return 'status-low';
+    if (value > range.max) return 'status-high';
+    return 'status-normal';
+}
+
+// Function to get status text
+function getStatusText(value, metric) {
+    if (!normalRanges[metric]) return 'Normal';
+    const range = normalRanges[metric];
+    if (value < range.min) return 'Below Normal';
+    if (value > range.max) return 'Above Normal';
+    return 'Normal';
+}
+
+// Function to calculate derived metrics
+function calculateDerivedMetrics(inputs) {
+    const results = {};
+    
+    // Calculate frequency range
+    results.frequency_range = inputs.mdvp_fhi - inputs.mdvp_flo;
+    
+    // Calculate jitter ratio
+    results.jitter_ratio = inputs.mdvp_jitter / inputs.mdvp_fo;
+    
+    // Calculate absolute jitter ratio
+    results.jitter_abs_ratio = inputs.mdvp_jitter_abs / inputs.mdvp_fo;
+    
+    return results;
+}
+
+// Function to update calculator results
+function updateCalculatorResults() {
+    const inputs = {
+        mdvp_fo: parseFloat(document.getElementById('calc_mdvp_fo').value) || 0,
+        mdvp_fhi: parseFloat(document.getElementById('calc_mdvp_fhi').value) || 0,
+        mdvp_flo: parseFloat(document.getElementById('calc_mdvp_flo').value) || 0,
+        mdvp_jitter: parseFloat(document.getElementById('calc_mdvp_jitter').value) || 0,
+        mdvp_jitter_abs: parseFloat(document.getElementById('calc_mdvp_jitter_abs').value) || 0
+    };
+    
+    const derivedMetrics = calculateDerivedMetrics(inputs);
+    const resultsTable = document.getElementById('calculatorResults');
+    resultsTable.innerHTML = '';
+    
+    // Add original input values
+    for (const [metric, value] of Object.entries(inputs)) {
+        const statusClass = getStatusClass(value, metric);
+        const statusText = getStatusText(value, metric);
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${metric}</td>
+            <td class="calc-value">${value.toFixed(6)}</td>
+            <td class="${statusClass}">${statusText}</td>
+        `;
+        resultsTable.appendChild(row);
+    }
+    
+    // Add derived metrics
+    for (const [metric, value] of Object.entries(derivedMetrics)) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${metric}</td>
+            <td class="calc-value">${value.toFixed(6)}</td>
+            <td class="status-normal">Calculated</td>
+        `;
+        resultsTable.appendChild(row);
+    }
+}
+
+// Function to copy calculator values to prediction form
+function copyToPredictionForm() {
+    const calculatorInputs = {
+        'mdvp_fo': 'calc_mdvp_fo',
+        'mdvp_fhi': 'calc_mdvp_fhi',
+        'mdvp_flo': 'calc_mdvp_flo',
+        'mdvp_jitter': 'calc_mdvp_jitter',
+        'mdvp_jitter_abs': 'calc_mdvp_jitter_abs'
+    };
+    
+    for (const [formId, calcId] of Object.entries(calculatorInputs)) {
+        const calcValue = document.getElementById(calcId).value;
+        if (calcValue) {
+            document.getElementById(formId).value = calcValue;
+        }
+    }
+}
+
+// Function to handle form submission
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const formData = {};
+    const form = event.target;
+    const formElements = form.elements;
+    
+    for (let i = 0; i < formElements.length; i++) {
+        const element = formElements[i];
+        if (element.name && element.value) {
+            formData[element.name] = parseFloat(element.value);
+        }
+    }
+    
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayResults(result);
+            saveToHistory(formData, result);
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while making the prediction.');
+    }
+}
+
+// Function to display results
+function displayResults(result) {
+    const resultsSection = document.getElementById('resultsSection');
+    const predictionResult = document.getElementById('predictionResult');
+    const modelPredictions = document.getElementById('modelPredictions');
+    
+    // Display overall prediction
+    const predictionText = result.overall_prediction === 1 ? 
+        'Parkinson\'s Disease Detected' : 
+        'No Parkinson\'s Disease Detected';
+    
+    predictionResult.innerHTML = `
+        <div class="prediction-status ${result.overall_prediction === 1 ? 'positive' : 'negative'}">
+            ${predictionText}
+        </div>
+    `;
+    
+    // Display individual model predictions
+    modelPredictions.innerHTML = '';
+    for (const [modelName, prediction] of Object.entries(result.model_predictions)) {
+        const modelCard = document.createElement('div');
+        modelCard.className = 'model-card';
+        modelCard.innerHTML = `
+            <h4>${modelName}</h4>
+            <div class="model-prediction ${prediction.prediction === 1 ? 'positive' : 'negative'}">
+                ${prediction.prediction === 1 ? 'Positive' : 'Negative'}
+            </div>
+            ${prediction.probability !== null ? 
+                `<div class="model-probability">
+                    Confidence: ${(prediction.probability * 100).toFixed(2)}%
+                </div>` : 
+                ''}
+        `;
+        modelPredictions.appendChild(modelCard);
+    }
+    
+    resultsSection.style.display = 'block';
+}
+
+// Function to save prediction to history
+function saveToHistory(inputs, result) {
+    const history = JSON.parse(localStorage.getItem('predictionHistory') || '[]');
+    const timestamp = new Date().toLocaleString();
+    
+    history.unshift({
+        timestamp,
+        inputs,
+        result
+    });
+    
+    // Keep only last 10 predictions
+    if (history.length > 10) {
+        history.pop();
+    }
+    
+    localStorage.setItem('predictionHistory', JSON.stringify(history));
+    updateHistoryTable();
+}
+
+// Function to update history table
+function updateHistoryTable() {
+    const historyTable = document.getElementById('historyTable');
+    const history = JSON.parse(localStorage.getItem('predictionHistory') || '[]');
+    
+    historyTable.innerHTML = '';
+    
+    for (const entry of history) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.timestamp}</td>
+            <td>${entry.inputs.mdvp_fo.toFixed(3)}</td>
+            <td>${entry.inputs.mdvp_fhi.toFixed(3)}</td>
+            <td>${entry.inputs.mdvp_flo.toFixed(3)}</td>
+            <td>${entry.inputs.mdvp_jitter.toFixed(6)}</td>
+            <td class="${entry.result.overall_prediction === 1 ? 'positive' : 'negative'}">
+                ${entry.result.overall_prediction === 1 ? 'Positive' : 'Negative'}
+            </td>
+            <td>
+                <button class="btn-view" onclick="viewHistoryEntry(${history.indexOf(entry)})">View</button>
+            </td>
+        `;
+        historyTable.appendChild(row);
+    }
+}
+
+// Function to view history entry
+function viewHistoryEntry(index) {
+    const history = JSON.parse(localStorage.getItem('predictionHistory') || '[]');
+    const entry = history[index];
+    
+    if (entry) {
+        // Fill form with historical values
+        for (const [key, value] of Object.entries(entry.inputs)) {
+            const input = document.getElementById(key);
+            if (input) {
+                input.value = value;
+            }
+        }
+        
+        // Display results
+        displayResults(entry.result);
+    }
+}
+
+// Function to clear history
+function clearHistory() {
+    if (confirm('Are you sure you want to clear the prediction history?')) {
+        localStorage.removeItem('predictionHistory');
+        updateHistoryTable();
+    }
+}
+
+// Function to use sample data
+function useSampleData() {
+    for (const [key, value] of Object.entries(sampleData)) {
         const input = document.getElementById(key);
         if (input) {
-            input.value = sampleData[key];
+            input.value = value;
         }
-    });
-}
-
-// Function to clear form
-function clearForm() {
-    document.getElementById('predictionForm').reset();
-}
-
-// Handle sample data checkbox
-document.getElementById('useSampleData').addEventListener('change', function(e) {
-    if (e.target.checked) {
-        fillSampleData();
-    } else {
-        clearForm();
     }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submission
+    const form = document.getElementById('predictionForm');
+    form.addEventListener('submit', handleFormSubmit);
+    
+    // Calculator inputs
+    const calculatorInputs = document.querySelectorAll('.calculator-input');
+    calculatorInputs.forEach(input => {
+        input.addEventListener('input', updateCalculatorResults);
+    });
+    
+    // Copy to form button
+    const copyButton = document.getElementById('copyToForm');
+    copyButton.addEventListener('click', copyToPredictionForm);
+    
+    // Clear history button
+    const clearButton = document.getElementById('clearHistory');
+    clearButton.addEventListener('click', clearHistory);
+    
+    // Sample data button
+    const sampleButton = document.getElementById('useSampleData');
+    sampleButton.addEventListener('click', useSampleData);
+    
+    // Initial history table update
+    updateHistoryTable();
 });
 
 // Function to get recommendation based on prediction
@@ -341,45 +625,6 @@ function getRecommendation(prediction, confidence) {
 // Calculator functionality
 const calculatorInputs = document.querySelectorAll('.calc-input');
 const calculationResults = document.getElementById('calculationResults');
-
-// Normal ranges for measurements
-const normalRanges = {
-    MDVP_Fo: { min: 100, max: 200 },
-    MDVP_Fhi: { min: 150, max: 250 },
-    MDVP_Flo: { min: 50, max: 150 },
-    MDVP_Jitter: { min: 0, max: 0.02 },
-    MDVP_Jitter_Abs: { min: 0, max: 0.0001 }
-};
-
-// Function to check if value is in normal range
-function checkNormalRange(value, metric) {
-    const range = normalRanges[metric];
-    if (!range) return 'unknown';
-    
-    if (value < range.min) return 'low';
-    if (value > range.max) return 'high';
-    return 'normal';
-}
-
-// Function to get status class
-function getStatusClass(status) {
-    switch (status) {
-        case 'normal': return 'status-normal';
-        case 'low': return 'status-warning';
-        case 'high': return 'status-danger';
-        default: return '';
-    }
-}
-
-// Function to get status text
-function getStatusText(status) {
-    switch (status) {
-        case 'normal': return 'Normal';
-        case 'low': return 'Below Normal';
-        case 'high': return 'Above Normal';
-        default: return 'Unknown';
-    }
-}
 
 // Function to calculate derived metrics
 function calculateDerivedMetrics(values) {
@@ -424,7 +669,7 @@ function updateCalculationResults() {
             row.innerHTML = `
                 <td>${metric}</td>
                 <td class="calculation-value">${value.toFixed(6)}</td>
-                <td><span class="status-indicator ${getStatusClass(status)}">${getStatusText(status)}</span></td>
+                <td><span class="status-indicator ${getStatusClass(value, metric)}">${getStatusText(value, metric)}</span></td>
             `;
             calculationResults.appendChild(row);
         }

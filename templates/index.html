@@ -6,217 +6,224 @@
     <title>Parkinson's Disease Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card main-card">
-                    <div class="card-header text-center">
-                        <h1>Parkinson's Disease Prediction</h1>
-                        <p class="lead">Enter the patient's voice measurements to predict Parkinson's Disease</p>
+        <header>
+            <h1>Parkinson's Disease Prediction System</h1>
+            <p class="subtitle">Using Machine Learning to Predict Parkinson's Disease from Voice Measurements</p>
+        </header>
+
+        <main>
+            <!-- Input Form Section -->
+            <section class="input-section">
+                <h2>Voice Measurements</h2>
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="mdvp_fo">MDVP:Fo (Hz)</label>
+                        <input type="number" step="0.001" id="mdvp_fo" name="mdvp_fo" required>
                     </div>
-                    <div class="card-body">
-                        <!-- Calculator Section -->
-                        <div class="calculator-section mb-4">
-                            <h3 class="text-center mb-3">Voice Measurement Calculator</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="calc_MDVP_Fo" class="form-label">MDVP:Fo (Hz)</label>
-                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Fo" name="calc_MDVP_Fo">
-                                        <small class="text-muted">Average vocal fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="calc_MDVP_Fhi" class="form-label">MDVP:Fhi (Hz)</label>
-                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Fhi" name="calc_MDVP_Fhi">
-                                        <small class="text-muted">Maximum vocal fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="calc_MDVP_Flo" class="form-label">MDVP:Flo (Hz)</label>
-                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Flo" name="calc_MDVP_Flo">
-                                        <small class="text-muted">Minimum vocal fundamental frequency</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="calc_MDVP_Jitter" class="form-label">MDVP:Jitter (%)</label>
-                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Jitter" name="calc_MDVP_Jitter">
-                                        <small class="text-muted">Variation in fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="calc_MDVP_Jitter_Abs" class="form-label">MDVP:Jitter(Abs)</label>
-                                        <input type="number" step="any" class="form-control calc-input" id="calc_MDVP_Jitter_Abs" name="calc_MDVP_Jitter_Abs">
-                                        <small class="text-muted">Absolute variation in fundamental frequency</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="calculation-results mt-3">
-                                <h4>Calculated Values:</h4>
-                                <div class="table-responsive">
-                                    <table class="table table-sm">
-                                        <thead>
-                                            <tr>
-                                                <th>Metric</th>
-                                                <th>Value</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="calculationResults">
-                                            <!-- Will be populated by JavaScript -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="mdvp_fhi">MDVP:Fhi (Hz)</label>
+                        <input type="number" step="0.001" id="mdvp_fhi" name="mdvp_fhi" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_flo">MDVP:Flo (Hz)</label>
+                        <input type="number" step="0.001" id="mdvp_flo" name="mdvp_flo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_jitter">MDVP:Jitter (%)</label>
+                        <input type="number" step="0.001" id="mdvp_jitter" name="mdvp_jitter" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_jitter_abs">MDVP:Jitter(Abs)</label>
+                        <input type="number" step="0.001" id="mdvp_jitter_abs" name="mdvp_jitter_abs" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_rap">MDVP:RAP</label>
+                        <input type="number" step="0.001" id="mdvp_rap" name="mdvp_rap" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_ppq">MDVP:PPQ</label>
+                        <input type="number" step="0.001" id="mdvp_ppq" name="mdvp_ppq" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_ddp">MDVP:DDP</label>
+                        <input type="number" step="0.001" id="mdvp_ddp" name="mdvp_ddp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_shimmer">MDVP:Shimmer</label>
+                        <input type="number" step="0.001" id="mdvp_shimmer" name="mdvp_shimmer" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_shimmer_db">MDVP:Shimmer(dB)</label>
+                        <input type="number" step="0.001" id="mdvp_shimmer_db" name="mdvp_shimmer_db" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_shimmer_apq3">MDVP:Shimmer(APQ3)</label>
+                        <input type="number" step="0.001" id="mdvp_shimmer_apq3" name="mdvp_shimmer_apq3" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_shimmer_apq5">MDVP:Shimmer(APQ5)</label>
+                        <input type="number" step="0.001" id="mdvp_shimmer_apq5" name="mdvp_shimmer_apq5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_apq">MDVP:APQ</label>
+                        <input type="number" step="0.001" id="mdvp_apq" name="mdvp_apq" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mdvp_dda">MDVP:DDA</label>
+                        <input type="number" step="0.001" id="mdvp_dda" name="mdvp_dda" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nhr">NHR</label>
+                        <input type="number" step="0.001" id="nhr" name="nhr" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hnr">HNR</label>
+                        <input type="number" step="0.001" id="hnr" name="hnr" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rpde">RPDE</label>
+                        <input type="number" step="0.001" id="rpde" name="rpde" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dfa">DFA</label>
+                        <input type="number" step="0.001" id="dfa" name="dfa" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spread1">Spread1</label>
+                        <input type="number" step="0.001" id="spread1" name="spread1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="spread2">Spread2</label>
+                        <input type="number" step="0.001" id="spread2" name="spread2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="d2">D2</label>
+                        <input type="number" step="0.001" id="d2" name="d2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ppe">PPE</label>
+                        <input type="number" step="0.001" id="ppe" name="ppe" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Predict</button>
+                        <button type="button" id="useSampleData" class="btn-secondary">Use Sample Data</button>
+                    </div>
+                </form>
+            </section>
 
-                        <!-- History Section -->
-                        <div class="history-section mb-4">
-                            <h3 class="text-center mb-3">Previous Measurements</h3>
-                            <div class="history-controls mb-3">
-                                <button id="clearHistory" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash"></i> Clear History
-                                </button>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>MDVP:Fo</th>
-                                            <th>MDVP:Fhi</th>
-                                            <th>MDVP:Flo</th>
-                                            <th>MDVP:Jitter</th>
-                                            <th>Result</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="historyTable">
-                                        <!-- Will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="model-comparison">
-                            <h3>Model Performance Comparison</h3>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Model</th>
-                                            <th>Accuracy</th>
-                                            <th>Precision</th>
-                                            <th>Recall</th>
-                                            <th>F1-Score</th>
-                                            <th>Specificity</th>
-                                            <th>Sensitivity</th>
-                                            <th>Confusion Matrix</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modelComparisonTable">
-                                        <!-- Will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="sample-data-toggle mb-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="useSampleData">
-                                <label class="form-check-label" for="useSampleData">
-                                    Use Sample Data
-                                </label>
-                            </div>
-                        </div>
-
-                        <form id="predictionForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="MDVP_Fo" class="form-label">MDVP:Fo (Hz)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Fo" name="MDVP_Fo" required>
-                                        <small class="text-muted">Average vocal fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Fhi" class="form-label">MDVP:Fhi (Hz)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Fhi" name="MDVP_Fhi" required>
-                                        <small class="text-muted">Maximum vocal fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Flo" class="form-label">MDVP:Flo (Hz)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Flo" name="MDVP_Flo" required>
-                                        <small class="text-muted">Minimum vocal fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Jitter" class="form-label">MDVP:Jitter (%)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Jitter" name="MDVP_Jitter" required>
-                                        <small class="text-muted">Variation in fundamental frequency</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Jitter_Abs" class="form-label">MDVP:Jitter(Abs)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Jitter_Abs" name="MDVP_Jitter_Abs" required>
-                                        <small class="text-muted">Absolute variation in fundamental frequency</small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="MDVP_RAP" class="form-label">MDVP:RAP</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_RAP" name="MDVP_RAP" required>
-                                        <small class="text-muted">Relative amplitude perturbation</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_PPQ" class="form-label">MDVP:PPQ</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_PPQ" name="MDVP_PPQ" required>
-                                        <small class="text-muted">Five-point period perturbation quotient</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="Jitter_DDP" class="form-label">Jitter:DDP</label>
-                                        <input type="number" step="any" class="form-control" id="Jitter_DDP" name="Jitter_DDP" required>
-                                        <small class="text-muted">Average absolute difference of differences</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Shimmer" class="form-label">MDVP:Shimmer</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Shimmer" name="MDVP_Shimmer" required>
-                                        <small class="text-muted">Variation in amplitude</small>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="MDVP_Shimmer_dB" class="form-label">MDVP:Shimmer(dB)</label>
-                                        <input type="number" step="any" class="form-control" id="MDVP_Shimmer_dB" name="MDVP_Shimmer_dB" required>
-                                        <small class="text-muted">Variation in amplitude in dB</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-primary btn-lg">Predict</button>
-                            </div>
-                        </form>
-
-                        <div id="result" class="mt-4" style="display: none;">
-                            <div class="alert" role="alert">
-                                <h4 class="alert-heading">Prediction Result</h4>
-                                <div class="result-content">
-                                    <div class="prediction-status">
-                                        <i class="fas fa-check-circle"></i>
-                                        <p id="predictionText" class="mb-2"></p>
-                                    </div>
-                                    <div class="confidence-meter">
-                                        <div class="progress">
-                                            <div id="confidenceBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                        <p id="confidenceText" class="mt-2"></p>
-                                    </div>
-                                    <div class="recommendation mt-3">
-                                        <h5>Recommendation:</h5>
-                                        <p id="recommendationText"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Prediction Results</h2>
+                <div class="results-container">
+                    <div class="prediction-result">
+                        <h3>Overall Prediction</h3>
+                        <div id="predictionResult" class="result-box"></div>
+                    </div>
+                    <div class="model-predictions">
+                        <h3>Individual Model Predictions</h3>
+                        <div id="modelPredictions" class="model-predictions-grid"></div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
+
+            <!-- Model Performance Section -->
+            <section class="model-performance-section">
+                <h2>Model Performance Comparison</h2>
+                <div class="performance-grid">
+                    <div class="performance-card">
+                        <h3>Confusion Matrices</h3>
+                        <img src="{{ url_for('static', filename='images/confusion_matrices.png') }}" alt="Confusion Matrices" class="performance-image">
+                    </div>
+                    <div class="performance-card">
+                        <h3>Model Comparison</h3>
+                        <img src="{{ url_for('static', filename='images/model_comparison.png') }}" alt="Model Comparison" class="performance-image">
+                    </div>
+                    <div class="performance-card">
+                        <h3>Feature Importance</h3>
+                        <img src="{{ url_for('static', filename='images/feature_importance.png') }}" alt="Feature Importance" class="performance-image">
+                    </div>
+                    <div class="performance-card">
+                        <h3>ROC Curves</h3>
+                        <img src="{{ url_for('static', filename='images/roc_curves.png') }}" alt="ROC Curves" class="performance-image">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calculator Section -->
+            <section class="calculator-section">
+                <h2>Voice Measurement Calculator</h2>
+                <div class="calculator-grid">
+                    <div class="calculator-inputs">
+                        <div class="form-group">
+                            <label for="calc_mdvp_fo">MDVP:Fo (Hz)</label>
+                            <input type="number" step="0.001" id="calc_mdvp_fo" class="calculator-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="calc_mdvp_fhi">MDVP:Fhi (Hz)</label>
+                            <input type="number" step="0.001" id="calc_mdvp_fhi" class="calculator-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="calc_mdvp_flo">MDVP:Flo (Hz)</label>
+                            <input type="number" step="0.001" id="calc_mdvp_flo" class="calculator-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="calc_mdvp_jitter">MDVP:Jitter (%)</label>
+                            <input type="number" step="0.001" id="calc_mdvp_jitter" class="calculator-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="calc_mdvp_jitter_abs">MDVP:Jitter(Abs)</label>
+                            <input type="number" step="0.001" id="calc_mdvp_jitter_abs" class="calculator-input">
+                        </div>
+                    </div>
+                    <div class="calculator-results">
+                        <h3>Calculated Values</h3>
+                        <table class="calculator-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calculatorResults">
+                                <!-- Results will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                        <button type="button" id="copyToForm" class="btn-secondary">Copy to Prediction Form</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section class="history-section">
+                <div class="history-header">
+                    <h2>Previous Measurements</h2>
+                    <button type="button" id="clearHistory" class="btn-secondary">Clear History</button>
+                </div>
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>MDVP:Fo</th>
+                                <th>MDVP:Fhi</th>
+                                <th>MDVP:Flo</th>
+                                <th>MDVP:Jitter</th>
+                                <th>Result</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <!-- History will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
     </div>
 
     <!-- Add model metrics data -->

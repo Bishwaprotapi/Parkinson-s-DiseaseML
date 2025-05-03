@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import pickle
 import numpy as np
 import pandas as pd
@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import cross_val_score, train_test_split
 import joblib
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -122,45 +123,41 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # Get values from the form
-        data = request.form.to_dict()
+        # Get input data
+        data = request.get_json()
+        features = np.array([float(data[feature]) for feature in data.keys()]).reshape(1, -1)
         
-        # Convert form data to float values
-        features = []
-        for key, value in data.items():
-            if key != 'csrf_token':  # Skip CSRF token
-                features.append(float(value))
-        
-        # Convert to numpy array and reshape
-        features = np.array(features).reshape(1, -1)
-        
-        # Scale the features
+        # Scale features
         features_scaled = scaler.transform(features)
         
         # Get predictions from all models
         predictions = {}
         for model_name, model in models.items():
-            pred = model.predict(features_scaled)
-            proba = model.predict_proba(features_scaled)
+            pred = model.predict(features_scaled)[0]
+            prob = model.predict_proba(features_scaled)[0][1] if hasattr(model, 'predict_proba') else None
             predictions[model_name] = {
-                'prediction': int(pred[0]),
-                'confidence': float(proba[0][pred[0]] * 100)
+                'prediction': int(pred),
+                'probability': float(prob) if prob is not None else None
             }
         
-        # Use Random Forest as the main prediction (since it's the best model)
-        main_prediction = predictions['Random Forest']
+        # Calculate overall prediction (majority vote)
+        votes = [pred['prediction'] for pred in predictions.values()]
+        overall_prediction = 1 if sum(votes) > len(votes)/2 else 0
         
-        result = {
-            'prediction': 'Parkinson\'s Disease Detected' if main_prediction['prediction'] == 1 else 'No Parkinson\'s Disease Detected',
-            'confidence': f"{main_prediction['confidence']:.2f}%",
-            'all_predictions': predictions
-        }
-        
-        return jsonify(result)
-    
+        return jsonify({
+            'success': True,
+            'overall_prediction': overall_prediction,
+            'model_predictions': predictions
+        })
     except Exception as e:
-        logger.error(f"Error in predict route: {str(e)}")
-        return jsonify({'error': str(e)}), 400
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
+@app.route('/static/images/<path:filename>')
+def serve_image(filename):
+    return send_from_directory('docs/images', filename)
 
 if __name__ == '__main__':
     app.run(debug=True) 
