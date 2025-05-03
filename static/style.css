@@ -158,4 +158,64 @@ body {
         flex-direction: column;
         text-align: center;
     }
+}
+
+/* Model comparison styles */
+.model-comparison {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.model-comparison h3 {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.best-model {
+    background-color: #e8f4f8;
+    font-weight: 500;
+}
+
+.accuracy-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.accuracy-high {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.accuracy-medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.accuracy-low {
+    background-color: #f8d7da;
+    color: #721c24;
 } 
