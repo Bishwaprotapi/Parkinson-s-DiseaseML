@@ -248,11 +248,21 @@
         {% endfor %}
     };
 
+    // Debug log to check if data is received
+    console.log('Model metrics data:', modelMetrics);
+
     function populateModelComparison() {
+        console.log('Populating model comparison table...');
         const tableBody = document.getElementById('modelComparisonTable');
+        if (!tableBody) {
+            console.error('Table body element not found!');
+            return;
+        }
+        
         tableBody.innerHTML = '';
 
         Object.entries(modelMetrics).forEach(([modelName, metrics], index) => {
+            console.log(`Processing model: ${modelName}`, metrics);
             const row = document.createElement('tr');
             if (index === 0) row.classList.add('best-model');
 
@@ -279,6 +289,7 @@
             `;
             tableBody.appendChild(row);
         });
+        console.log('Model comparison table populated successfully');
     }
 
     function getAccuracyClass(accuracy) {
@@ -289,6 +300,7 @@
 
     // Initialize the model comparison table when the page loads
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing model comparison...');
         populateModelComparison();
     });
     </script>

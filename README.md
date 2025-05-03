@@ -1,117 +1,176 @@
-# Parkinson's Disease Detection using Machine Learning
+# Parkinson's Disease Prediction System
 
-This project implements various machine learning models to detect Parkinson's Disease using voice measurements. The models are trained on a dataset containing various voice features that can help in early detection of Parkinson's Disease.
+A web-based application that uses machine learning to predict Parkinson's Disease based on voice measurements. The system employs multiple machine learning models and provides a user-friendly interface for inputting voice measurements and viewing predictions.
 
 ## Features
 
-- Multiple machine learning models implemented (SVM, Random Forest, Gradient Boosting)
-- Comprehensive model comparison and evaluation
-- Feature scaling and preprocessing
-- Model persistence using joblib
-- Visualization of results including confusion matrices and accuracy comparisons
+### 1. Multiple Model Support
+- Random Forest Classifier
+- Support Vector Machine (SVM)
+- K-Nearest Neighbors (KNN)
+- Decision Tree
+- Naive Bayes
+- Logistic Regression
 
-## Visualizations
+### 2. Model Performance Metrics
+- Accuracy
+- Precision
+- Recall
+- F1-Score
+- Specificity
+- Sensitivity
+- Confusion Matrix
 
-### Model Accuracy Comparison
-![Model Accuracy Comparison](model_accuracy_comparison.png)
-*Comparison of accuracy scores across different models*
+### 3. User Interface Features
+- Real-time voice measurement calculator
+- Sample data input option
+- Detailed prediction results
+- Model comparison table
+- History of previous predictions
+- Responsive design for all devices
 
-### Confusion Matrices
-#### Support Vector Machine (SVM)
-![SVM Confusion Matrix](confusion_matrix_svm.png)
-*Confusion matrix showing the performance of the SVM model*
+### 4. Voice Measurement Calculator
+- Input validation
+- Real-time calculations
+- Normal range indicators
+- Copy to prediction form functionality
 
-#### Random Forest
-![Random Forest Confusion Matrix](confusion_matrix_random_forest.png)
-*Confusion matrix showing the performance of the Random Forest model*
+### 5. Prediction History
+- Stores last 10 predictions
+- View previous measurements
+- Load previous values
+- Delete individual entries
+- Clear all history
 
-#### Gradient Boosting
-![Gradient Boosting Confusion Matrix](confusion_matrix_gradient_boosting.png)
-*Confusion matrix showing the performance of the Gradient Boosting model*
+## Setup Instructions
 
-## Model Performance
+### Prerequisites
+- Python 3.7 or higher
+- pip (Python package installer)
 
-Based on our experiments, the Random Forest classifier achieved the best performance with:
-- Accuracy: 98.74%
-- Precision: 98.87%
-- Recall: 98.74%
-- F1-score: 98.77%
-
-## Dataset
-
-The project uses the Parkinson's Disease dataset which contains various voice measurements. The dataset includes features like:
-- MDVP:Fo(Hz) - Average vocal fundamental frequency
-- MDVP:Fhi(Hz) - Maximum vocal fundamental frequency
-- MDVP:Flo(Hz) - Minimum vocal fundamental frequency
-- And various other voice-related measurements
-
-## Requirements
-
-- Python 3.7+
-- Required packages are listed in `requirements.txt`:
-  - pandas
-  - numpy
-  - matplotlib
-  - seaborn
-  - scikit-learn
-  - joblib
-  - scipy
-
-## Installation
+### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/Parkinson-s-DiseaseML.git
+git clone <repository-url>
 cd Parkinson-s-DiseaseML
 ```
 
-2. Create a virtual environment and activate it:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-3. Install the required packages:
+2. Install required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+3. Ensure all model files are present:
+- rf_clf.pkl (Random Forest model)
+- svm_clf.pkl (SVM model)
+- knn_clf.pkl (KNN model)
+- dt_clf.pkl (Decision Tree model)
+- nb_clf.pkl (Naive Bayes model)
+- lg_clf.pkl (Logistic Regression model)
+- scaler.pkl (Standard Scaler)
+- data.csv (Dataset)
 
-1. Run the model comparison script:
+### Running the Application
+
+1. Start the Flask server:
 ```bash
-python model_comparison.py
+python app.py
 ```
 
-This will:
-- Load and preprocess the dataset
-- Train multiple machine learning models
-- Compare their performance
-- Save the best model and scaler
-- Generate visualization plots
+2. Open your web browser and navigate to:
+```
+http://localhost:5000
+```
 
-## Model Files
+## Usage Guide
 
-The project includes several saved models:
-- `best_model.pkl` - The best performing model
-- `scaler.pkl` - The scaler used for feature normalization
-- Various other model files (svm_clf.pkl, rf_clf.pkl, etc.)
+### Making a Prediction
 
-## Results
+1. Enter voice measurements:
+   - MDVP:Fo (Hz)
+   - MDVP:Fhi (Hz)
+   - MDVP:Flo (Hz)
+   - MDVP:Jitter (%)
+   - MDVP:Jitter(Abs)
+   - And other required measurements
 
-The script generates several visualization files:
-- `model_accuracy_comparison.png` - Bar plot comparing model accuracies
-- `confusion_matrix_*.png` - Confusion matrices for each model
+2. Use the calculator:
+   - Input values in the calculator section
+   - View real-time calculations
+   - Check if values are within normal ranges
+   - Copy values to the prediction form
 
-## License
+3. Submit for prediction:
+   - Click the "Predict" button
+   - View the prediction result
+   - See confidence level
+   - Check predictions from all models
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Viewing Model Performance
+
+1. Model Comparison Table:
+   - View accuracy, precision, recall, and F1-score
+   - Compare performance across models
+   - See confusion matrix details
+   - Identify the best performing model
+
+2. Performance Metrics:
+   - Accuracy: Overall prediction accuracy
+   - Precision: True positive rate
+   - Recall: Sensitivity to positive cases
+   - F1-Score: Harmonic mean of precision and recall
+   - Specificity: True negative rate
+   - Sensitivity: True positive rate
+
+### Managing History
+
+1. View History:
+   - See previous predictions
+   - View measurement values
+   - Check prediction results
+
+2. History Actions:
+   - Load previous values
+   - Delete individual entries
+   - Clear all history
+
+## Technical Details
+
+### Machine Learning Models
+- Random Forest: Best performing model
+- SVM: Good for non-linear data
+- KNN: Simple and effective
+- Decision Tree: Easy to interpret
+- Naive Bayes: Fast and efficient
+- Logistic Regression: Linear model baseline
+
+### Data Processing
+- Standard scaling of features
+- Train-test split (80-20)
+- Cross-validation for model evaluation
+
+### Web Technologies
+- Frontend: HTML, CSS, JavaScript
+- Backend: Flask (Python)
+- Data Storage: Local Storage (Browser)
+- UI Framework: Bootstrap
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
-- Dataset source: [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Parkinson%27s+Disease+Classification)
-- Special thanks to all contributors and the open-source community
+- Dataset: UCI Machine Learning Repository
+- Machine Learning: scikit-learn
+- Web Framework: Flask
+- UI Framework: Bootstrap

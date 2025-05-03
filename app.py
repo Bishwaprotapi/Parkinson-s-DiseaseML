@@ -6,26 +6,46 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.model_selection import cross_val_score, train_test_split
 import joblib
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 # Load the models and scaler
-models = {
-    'Random Forest': joblib.load('rf_clf.pkl'),
-    'SVM': joblib.load('svm_clf.pkl'),
-    'KNN': joblib.load('knn_clf.pkl'),
-    'Decision Tree': joblib.load('dt_clf.pkl'),
-    'Naive Bayes': joblib.load('nb_clf.pkl'),
-    'Logistic Regression': joblib.load('lg_clf.pkl')
-}
+try:
+    models = {
+        'Random Forest': joblib.load('rf_clf.pkl'),
+        'SVM': joblib.load('svm_clf.pkl'),
+        'KNN': joblib.load('knn_clf.pkl'),
+        'Decision Tree': joblib.load('dt_clf.pkl'),
+        'Naive Bayes': joblib.load('nb_clf.pkl'),
+        'Logistic Regression': joblib.load('lg_clf.pkl')
+    }
+    logger.info("Successfully loaded all models")
+except Exception as e:
+    logger.error(f"Error loading models: {str(e)}")
+    raise
 
-with open('scaler.pkl', 'rb') as f:
-    scaler = pickle.load(f)
+try:
+    with open('scaler.pkl', 'rb') as f:
+        scaler = pickle.load(f)
+    logger.info("Successfully loaded scaler")
+except Exception as e:
+    logger.error(f"Error loading scaler: {str(e)}")
+    raise
 
 # Load the dataset for performance calculation
-data = pd.read_csv('data.csv')
-X = data.drop(['status', 'name'], axis=1)
-y = data['status']
+try:
+    data = pd.read_csv('data.csv')
+    X = data.drop(['status', 'name'], axis=1)
+    y = data['status']
+    logger.info("Successfully loaded dataset")
+except Exception as e:
+    logger.error(f"Error loading dataset: {str(e)}")
+    raise
 
 # Split the data for evaluation
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -37,40 +57,47 @@ X_test_scaled = scaler.transform(X_test)
 def calculate_model_metrics():
     metrics = {}
     for model_name, model in models.items():
-        # Train the model
-        model.fit(X_train_scaled, y_train)
-        
-        # Make predictions
-        y_pred = model.predict(X_test_scaled)
-        
-        # Calculate metrics
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        
-        # Calculate confusion matrix
-        cm = confusion_matrix(y_test, y_pred)
-        tn, fp, fn, tp = cm.ravel()
-        
-        # Calculate additional metrics
-        specificity = tn / (tn + fp)  # True Negative Rate
-        sensitivity = tp / (tp + fn)  # True Positive Rate
-        
-        metrics[model_name] = {
-            'accuracy': float(accuracy),
-            'precision': float(precision),
-            'recall': float(recall),
-            'f1Score': float(f1),
-            'specificity': float(specificity),
-            'sensitivity': float(sensitivity),
-            'confusion_matrix': {
-                'true_negative': int(tn),
-                'false_positive': int(fp),
-                'false_negative': int(fn),
-                'true_positive': int(tp)
+        try:
+            # Train the model
+            model.fit(X_train_scaled, y_train)
+            
+            # Make predictions
+            y_pred = model.predict(X_test_scaled)
+            
+            # Calculate metrics
+            accuracy = accuracy_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred)
+            recall = recall_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred)
+            
+            # Calculate confusion matrix
+            cm = confusion_matrix(y_test, y_pred)
+            tn, fp, fn, tp = cm.ravel()
+            
+            # Calculate additional metrics
+            specificity = tn / (tn + fp)  # True Negative Rate
+            sensitivity = tp / (tp + fn)  # True Positive Rate
+            
+            metrics[model_name] = {
+                'accuracy': float(accuracy),
+                'precision': float(precision),
+                'recall': float(recall),
+                'f1Score': float(f1),
+                'specificity': float(specificity),
+                'sensitivity': float(sensitivity),
+                'confusion_matrix': {
+                    'true_negative': int(tn),
+                    'false_positive': int(fp),
+                    'false_negative': int(fn),
+                    'true_positive': int(tp)
+                }
             }
-        }
+            logger.info(f"Successfully calculated metrics for {model_name}")
+        except Exception as e:
+            logger.error(f"Error calculating metrics for {model_name}: {str(e)}")
+            raise
+    
+    logger.debug(f"Calculated metrics: {metrics}")
     return metrics
 
 def get_accuracy_class(accuracy):
@@ -83,9 +110,14 @@ def get_accuracy_class(accuracy):
 
 @app.route('/')
 def home():
-    # Calculate model metrics
-    model_metrics = calculate_model_metrics()
-    return render_template('index.html', model_metrics=model_metrics, get_accuracy_class=get_accuracy_class)
+    try:
+        # Calculate model metrics
+        model_metrics = calculate_model_metrics()
+        logger.debug(f"Model metrics being sent to template: {model_metrics}")
+        return render_template('index.html', model_metrics=model_metrics, get_accuracy_class=get_accuracy_class)
+    except Exception as e:
+        logger.error(f"Error in home route: {str(e)}")
+        return str(e), 500
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -127,6 +159,7 @@ def predict():
         return jsonify(result)
     
     except Exception as e:
+        logger.error(f"Error in predict route: {str(e)}")
         return jsonify({'error': str(e)}), 400
 
 if __name__ == '__main__':
