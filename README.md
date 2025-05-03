@@ -2,6 +2,9 @@
 
 A web-based application that uses machine learning to predict Parkinson's Disease based on voice measurements. The system employs multiple machine learning models and provides a user-friendly interface for inputting voice measurements and viewing predictions.
 
+![System Overview](docs/images/system_overview.png)
+*Figure 1: System Overview - Main components and workflow*
+
 ## Features
 
 ### 1. Multiple Model Support
@@ -12,6 +15,9 @@ A web-based application that uses machine learning to predict Parkinson's Diseas
 - Naive Bayes
 - Logistic Regression
 
+![Model Comparison](docs/images/model_comparison.png)
+*Figure 2: Model Performance Comparison - Accuracy, Precision, Recall, and F1-Score*
+
 ### 2. Model Performance Metrics
 - Accuracy
 - Precision
@@ -21,6 +27,9 @@ A web-based application that uses machine learning to predict Parkinson's Diseas
 - Sensitivity
 - Confusion Matrix
 
+![Performance Metrics](docs/images/performance_metrics.png)
+*Figure 3: Detailed Performance Metrics for Each Model*
+
 ### 3. User Interface Features
 - Real-time voice measurement calculator
 - Sample data input option
@@ -29,11 +38,20 @@ A web-based application that uses machine learning to predict Parkinson's Diseas
 - History of previous predictions
 - Responsive design for all devices
 
+![Web Interface](docs/images/web_interface.png)
+*Figure 4: Main Web Interface - Input Form and Calculator*
+
+![Prediction Results](docs/images/prediction_results.png)
+*Figure 5: Prediction Results Display*
+
 ### 4. Voice Measurement Calculator
 - Input validation
 - Real-time calculations
 - Normal range indicators
 - Copy to prediction form functionality
+
+![Calculator](docs/images/calculator.png)
+*Figure 6: Voice Measurement Calculator with Real-time Validation*
 
 ### 5. Prediction History
 - Stores last 10 predictions
@@ -41,6 +59,9 @@ A web-based application that uses machine learning to predict Parkinson's Diseas
 - Load previous values
 - Delete individual entries
 - Clear all history
+
+![History View](docs/images/history_view.png)
+*Figure 7: Prediction History Management*
 
 ## Setup Instructions
 
@@ -95,6 +116,9 @@ http://localhost:5000
    - MDVP:Jitter(Abs)
    - And other required measurements
 
+![Input Form](docs/images/input_form.png)
+*Figure 8: Voice Measurement Input Form*
+
 2. Use the calculator:
    - Input values in the calculator section
    - View real-time calculations
@@ -114,6 +138,9 @@ http://localhost:5000
    - Compare performance across models
    - See confusion matrix details
    - Identify the best performing model
+
+![Model Metrics](docs/images/model_metrics.png)
+*Figure 9: Detailed Model Performance Metrics*
 
 2. Performance Metrics:
    - Accuracy: Overall prediction accuracy
@@ -145,16 +172,25 @@ http://localhost:5000
 - Naive Bayes: Fast and efficient
 - Logistic Regression: Linear model baseline
 
+![Model Architecture](docs/images/model_architecture.png)
+*Figure 10: Machine Learning Model Architecture*
+
 ### Data Processing
 - Standard scaling of features
 - Train-test split (80-20)
 - Cross-validation for model evaluation
+
+![Data Processing](docs/images/data_processing.png)
+*Figure 11: Data Processing Pipeline*
 
 ### Web Technologies
 - Frontend: HTML, CSS, JavaScript
 - Backend: Flask (Python)
 - Data Storage: Local Storage (Browser)
 - UI Framework: Bootstrap
+
+![Tech Stack](docs/images/tech_stack.png)
+*Figure 12: Technology Stack Overview*
 
 ## Contributing
 
@@ -174,3 +210,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Machine Learning: scikit-learn
 - Web Framework: Flask
 - UI Framework: Bootstrap
+
+## Screenshots Gallery
+
+![Mobile View](docs/images/mobile_view.png)
+*Figure 13: Mobile Responsive View*
+
+![Dark Mode](docs/images/dark_mode.png)
+*Figure 14: Dark Mode Interface*
+
+![Error Handling](docs/images/error_handling.png)
+*Figure 15: Error Handling and Validation*
